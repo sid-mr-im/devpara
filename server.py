@@ -1,7 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import ImgToText as img
 import time
-
+# from b2
 hostName = "localhost"
 serverPort = 8080
 
