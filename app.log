@@ -1,0 +1,6 @@
+ERROR:root:Traceback (most recent call last):
+File "c:\Users\siddhant Sarthak\Visual Studio Code Projects\Python\devpara\
+live_bar.py”, line 5, in <module>
+os.system(‘clear')
+NameError: name ‘os’ is not defined
+

@@ -36,6 +36,23 @@ def post():
   except Exception as e:
     return {"happen": False, "error": e}
 
+@app.route("/swift")
+def swift():
+  uid = request.args.get('uid')
+  pid = request.args.get('pid')
+  swift = request.args.get('swift')
+  print(swift)
+  try:
+    user = usersCollection.document(uid)
+    project = user.collection('projects').document(pid)
+    # project_details = project.get().to_dict()
+    # return jsonify(project_details.get('progress'))
+    # json_swift = json.dumps(swift)
+    # project.update({'swifts': firestore.ArrayUnion([json_swift])})
+    return {"happen": True, "value": swift, "responseCode": 200}
+  except Exception as e:
+    return {"happen": False, "error": e}
+  
 @app.route("/run")
 def run():
   uid = request.args.get('uid')
