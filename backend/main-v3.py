@@ -27,18 +27,20 @@ def select_area(event, x, y, flags, params):
         cv2.rectangle(clone, (ix, iy), (x, y), (0, 255, 0), 1)
         cropRect[0], cropRect[1], cropRect[2], cropRect[3] = ix*2, iy*2, x*2, y*2
 
-def catch_errors(value):
-    error_keys = ["Traceback"]
-    for key in error_keys:
-        if key.lower() in value.lower():
-            logging.basicConfig(filename='app.log', filemode='w')
-            # logger.setLevel(logging.ERROR)
-            logging.error(values)
-            print(value.split())
-            return False
-        else:
-            return True
-    
+def catch_errors(values):
+    error_keys = ["interrupt", "error", "fault"]
+    if "traceback" in values.lower():
+        vals = values.split()
+        for val in vals:
+            for key in error_keys:
+                if key.lower() in val:
+                    logging.basicConfig(filename='error.log', filemode='w')
+                    # logger.setLevel(logging.ERROR)
+                    logging.error(val)
+                    return False
+    else:
+        return True
+
 user = None
 project = None
 print("1> New User\n2> Existing User")
@@ -106,38 +108,34 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tessera
 while(True):
     values = pytesseract.image_to_string(ImageGrab.grab().crop(cropRect))
     if catch_errors(values):
-        val = urllib.parse.quote(values).strip()
-        uri = 'http://127.0.0.1:5000/post?uid={}&pid={}&val={}'.format(user, project, val)
+        vals = values.split()
+        # print(vals)
+        sta = vals[0]
+        pro = urllib.parse.quote(vals[1]).strip()
+        print("[INFO] Progress: {}, Status: {}".format(pro, sta))
+        uri = 'http://127.0.0.1:5000/post?uid={}&pid={}&pro={}&sta={}'.format(user, project, pro, sta)
         response = urllib.request.urlopen(uri)
         # print(values, val)
         # print(response.read())
     else:
         # print(values)
         print("[INFO] Terminated.")
-        uri = 'http://127.0.0.1:5000/post?uid={}&pid={}&val={}'.format(user, project, "Terminated")
+        uri = 'http://127.0.0.1:5000/post?uid={}&pid={}&pro={}&sta={}'.format(user, project, "-", "Terminated")
         response = urllib.request.urlopen(uri)
         break
     time.sleep(2)
 
 def find_solution(query):
-    results = []
-    for result in search(query, num_results=10, lang="en"):
-        # print(result)
-        results.append(result)
-        time.sleep(1)
-    # x = urllib.parse.quote(results).strip()
-    # x = urllib.parse.urlencode({'swift': results})
-    for res in results:
-        # x = urllib.parse.quote(res).strip()
-        # uri = 'http://127.0.0.1:5000/swift?uid={}&pid={}&swift={}'.format(user, project, res)
-        print(res)
+    for result in search(query, stop=10, lang="en"):
+        uri = 'http://127.0.0.1:5000/swift?uid={}&pid={}&swift={}'.format(user, project, result)
+        response = urllib.request.urlopen(uri)
+        print(result)
+        time.sleep(2)
 
-    response = urllib.request.urlopen(uri)
-
-with open("app.log", 'r') as fin:
+with open("error.log", 'r') as fin:
     for line in fin:
-        line = line.strip()
-        if "error" in line.lower():
+        line = line.strip().lower()
+        if "error" in line or "interrupt" in line:
             print("\n{}".format(line))
             find_solution(line)
             break

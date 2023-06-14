@@ -25,14 +25,16 @@ def add():
 def post():
   uid = request.args.get('uid')
   pid = request.args.get('pid')
-  val = request.args.get('val')
+  pro = request.args.get('pro')
+  sta = request.args.get('sta')
   try:
     user = usersCollection.document(uid)
     project = user.collection('projects').document(pid)
     # project_details = project.get().to_dict()
     # return jsonify(project_details.get('progress'))
-    project.update({'progress': val})
-    return {"happen": True, "value": val, "responseCode": 200}
+    project.update({'progress': pro})
+    project.update({'status': sta})
+    return {"happen": True, "responseCode": 200}
   except Exception as e:
     return {"happen": False, "error": e}
 
@@ -46,9 +48,8 @@ def swift():
     user = usersCollection.document(uid)
     project = user.collection('projects').document(pid)
     # project_details = project.get().to_dict()
-    # return jsonify(project_details.get('progress'))
     # json_swift = json.dumps(swift)
-    # project.update({'swifts': firestore.ArrayUnion([json_swift])})
+    project.update({'swifts': firestore.ArrayUnion([swift])})
     return {"happen": True, "value": swift, "responseCode": 200}
   except Exception as e:
     return {"happen": False, "error": e}
@@ -62,7 +63,7 @@ def run():
     user = usersCollection.document(uid)
     project = user.collection('projects').document(pid)
     project.update({'command': cmd})
-    # os.system(cmd)
+    os.system(cmd)
     subprocess.Popen(cmd, shell=True, )
     return {"happen": True, "command": cmd, "responseCode": 200}
   except Exception as e:
